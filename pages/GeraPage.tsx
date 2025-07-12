@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // FIX: Imported useState
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PieChart,
@@ -15,16 +15,25 @@ import {
   CardTitle,
   CardDescription,
   KpiCard,
-} from "../components/ui";
+} from "../components/ui"; // Assumed to exist
 import {
   CheckCircleIcon,
   RocketIcon,
   ClipboardListIcon,
   ChevronDownIcon,
-} from "../components/icons"; // FIX: ChevronDownIcon will now be found
+} from "../components/icons"; // Assumed to exist
 
-// --- Static Data with Detailed Descriptions ---
-const timelineData = [
+// --- TYPE DEFINITION for our data structure ---
+interface TimelineData {
+  weeks: string;
+  activity: string;
+  status: string;
+  summary: string;
+  details: string[];
+}
+
+// --- DATA SOURCE 1: Your New Project Timeline Data ---
+const projectTimelineData: TimelineData[] = [
   {
     weeks: "1-2",
     activity: "Requirement Gathering & Analysis",
@@ -32,10 +41,8 @@ const timelineData = [
     summary:
       "Defining project scope, objectives, and key deliverables with stakeholders.",
     details: [
-      "Conduct stakeholder interviews to identify pain points and needs.",
-      "Analyze existing systems and workflows to find opportunities for improvement.",
-      "Create a detailed Software Requirement Specification (SRS) document.",
-      "Finalize project scope and get sign-off from all key parties.",
+      "Conduct stakeholder interviews",
+      "Finalize project scope and get sign-off",
     ],
   },
   {
@@ -45,10 +52,8 @@ const timelineData = [
     summary:
       "Creating design mockups, user flow diagrams, and the database schema.",
     details: [
-      "Develop low-fidelity wireframes for all major application screens.",
-      "Create high-fidelity mockups and a clickable prototype in Figma.",
-      "Design the MongoDB schema and define data relationships.",
-      "Architect the overall system, including frontend/backend separation of concerns.",
+      "Develop low-fidelity wireframes",
+      "Create high-fidelity mockups in Figma",
     ],
   },
   {
@@ -56,12 +61,7 @@ const timelineData = [
     activity: "Core Module Development",
     status: "In Progress",
     summary: "Building the job posting and candidate sourcing features.",
-    details: [
-      "Set up the MERN stack project structure with Express.js and React.",
-      "Develop the API endpoints for creating, reading, updating, and deleting job postings.",
-      "Build the React components for displaying job lists and individual job pages.",
-      "Implement the candidate application form and connect it to the backend.",
-    ],
+    details: ["Set up project structure", "Develop API endpoints for jobs"],
   },
   {
     weeks: "7",
@@ -69,10 +69,8 @@ const timelineData = [
     status: "In Progress",
     summary: "Developing automated shortlisting and letter generation.",
     details: [
-      "Implement AI-powered candidate ranking based on job descriptions.",
-      "Create templates for automated offer and rejection letters.",
-      "Integrate a service for sending emails directly from the platform.",
-      "Build the UI for HR managers to trigger and review automated actions.",
+      "Implement AI candidate ranking",
+      "Create templates for automated letters",
     ],
   },
   {
@@ -81,10 +79,28 @@ const timelineData = [
     status: "Not Started",
     summary: "Designing the interfaces for new hire onboarding workflows.",
     details: [
-      "Design a dynamic checklist for new hires to track onboarding progress.",
-      "Create a portal for uploading required documents securely.",
-      "Develop a dashboard for HR to monitor the onboarding status of all new employees.",
+      "Design a dynamic checklist for new hires",
+      "Create a portal for document uploads",
     ],
+  },
+  {
+    weeks: "9",
+    activity: "Promotion & Succession Planning",
+    status: "Not Started",
+    summary:
+      "Develop modules for career progression and identifying future leaders.",
+    details: [
+      "Design promotion workflow",
+      "Build succession planning dashboard",
+    ],
+  },
+  {
+    weeks: "10",
+    activity: "Performance Dashboards",
+    status: "Not Started",
+    summary:
+      "Build and integrate performance dashboards and metrics for HR analytics.",
+    details: ["Integrate with data sources", "Create visualization charts"],
   },
   {
     weeks: "11",
@@ -92,10 +108,8 @@ const timelineData = [
     status: "Not Started",
     summary: "Conducting end-to-end testing and gathering user feedback.",
     details: [
-      "Write and execute unit tests for critical backend and frontend logic.",
-      "Perform integration testing to ensure all modules work together seamlessly.",
-      "Conduct User Acceptance Testing (UAT) with a select group of stakeholders.",
-      "Collect and document feedback for the final iteration.",
+      "Perform User Acceptance Testing (UAT)",
+      "Collect and document feedback",
     ],
   },
   {
@@ -105,36 +119,63 @@ const timelineData = [
     summary:
       "Final deployment, creating documentation, and presenting the project.",
     details: [
-      "Configure production environment and set up CI/CD pipelines.",
-      "Deploy the application to a cloud hosting service.",
-      "Create comprehensive user and technical documentation.",
-      "Prepare and deliver the final project presentation to stakeholders.",
+      "Deploy to production server",
+      "Deliver final project presentation",
     ],
   },
 ];
 
-const COLORS = {
+// --- DATA SOURCE 2: A "Jira" Demo Model (Fake Data) ---
+const jiraDemoData: TimelineData[] = [
+  {
+    weeks: "JIRA-101",
+    activity: "Fix login button styling on Safari",
+    status: "Done",
+    summary:
+      "The login button was misaligned on Safari browsers. This has been corrected.",
+    details: ["Assignee: Adithyan", "Status: Done", "Type: Bug"],
+  },
+  {
+    weeks: "JIRA-105",
+    activity: "Implement password reset functionality",
+    status: "In Progress",
+    summary:
+      "Developing the API endpoint and frontend form for user password resets.",
+    details: ["Assignee: Maria", "Status: In Progress", "Type: Story"],
+  },
+  {
+    weeks: "JIRA-112",
+    activity: "Design new user profile page",
+    status: "To Do",
+    summary: "Create mockups for a redesigned user profile page.",
+    details: ["Assignee: Unassigned", "Status: To Do", "Type: Task"],
+  },
+];
+
+// Color mapping for all statuses
+type StatusColorKey =
+  | "Completed"
+  | "Done"
+  | "In Progress"
+  | "Not Started"
+  | "To Do";
+const COLORS: Record<StatusColorKey, string> = {
   Completed: "#22c55e",
+  Done: "#22c55e",
   "In Progress": "#f59e0b",
   "Not Started": "#ef4444",
+  "To Do": "#ef4444",
 };
 
-// --- Accordion Item Component for the Timeline ---
-const TimelineItem = ({
-  item,
-  isOpen,
-  onClick,
-}: {
-  item: (typeof timelineData)[0];
+// --- Reusable Accordion Item Component ---
+interface TimelineItemProps {
+  item: TimelineData;
   isOpen: boolean;
   onClick: () => void;
-}) => {
-  const statusColor =
-    item.status === "Completed"
-      ? "bg-green-500"
-      : item.status === "In Progress"
-      ? "bg-amber-500"
-      : "bg-muted";
+}
+const TimelineItem = ({ item, isOpen, onClick }: TimelineItemProps) => {
+  const statusKey = item.status as StatusColorKey;
+  const statusColor = COLORS[statusKey] || "bg-muted";
   return (
     <div className="relative pl-8">
       <div
@@ -144,7 +185,9 @@ const TimelineItem = ({
         <div className="flex items-center justify-between">
           <div className="flex-grow">
             <p className="text-xs font-semibold text-muted-foreground">
-              WEEK(S) {item.weeks}
+              {item.weeks.startsWith("JIRA-")
+                ? `ISSUE: ${item.weeks}`
+                : `WEEK(S): ${item.weeks}`}
             </p>
             <h4 className="font-semibold text-lg">{item.activity}</h4>
           </div>
@@ -153,7 +196,7 @@ const TimelineItem = ({
           </motion.div>
         </div>
       </div>
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isOpen && (
           <motion.div
             key="content"
@@ -164,7 +207,7 @@ const TimelineItem = ({
               open: { opacity: 1, height: "auto" },
               collapsed: { opacity: 0, height: 0 },
             }}
-            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             <div className="pt-4 pl-4 border-l-2 border-dashed border-border ml-1.5">
@@ -187,29 +230,32 @@ const TimelineItem = ({
   );
 };
 
-// --- Main Page Component ---
+// --- Main Page Component (Still named GeraPage but with updated content) ---
 export const GeraPage = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openTimelineIndex, setOpenTimelineIndex] = useState<number | null>(0);
+  const [openJiraIndex, setOpenJiraIndex] = useState<number | null>(0);
 
-  const totalPhases = timelineData.length;
-  const completedCount = timelineData.filter(
+  // Stats for the main project timeline
+  const totalPhases = projectTimelineData.length;
+  const completedCount = projectTimelineData.filter(
     (d) => d.status === "Completed"
   ).length;
-  const inProgressCount = timelineData.filter(
+  const inProgressCount = projectTimelineData.filter(
     (d) => d.status === "In Progress"
+  ).length;
+  const notStartedCount = projectTimelineData.filter(
+    (d) => d.status === "Not Started"
   ).length;
 
   const chartData = [
     { name: "Completed", value: completedCount },
     { name: "In Progress", value: inProgressCount },
-    {
-      name: "Not Started",
-      value: totalPhases - completedCount - inProgressCount,
-    },
+    { name: "Not Started", value: notStartedCount },
   ];
 
   return (
     <div className="space-y-6">
+      {/* --- SECTION 1: PROJECT TIMELINE --- */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -217,13 +263,11 @@ export const GeraPage = () => {
         <Card className="bg-card/70 backdrop-blur-lg">
           <CardHeader>
             <CardTitle className="text-2xl">
-              Gera – Performance & Progress Tracking Module
+              Project Timeline & Status
             </CardTitle>
             <CardDescription className="pt-2">
-              Gera is a smart visual module designed to track the progress,
-              performance, and task status of individuals or teams. It helps
-              present a clear summary of activities such as onboarding, project
-              tracking, or employee progress.
+              A high-level overview of the project plan and its current
+              progress.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -236,7 +280,7 @@ export const GeraPage = () => {
       >
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <KpiCard
-            title="Total Project Phases"
+            title="Total Phases"
             value={String(totalPhases)}
             icon={<ClipboardListIcon className="w-6 h-6" />}
           />
@@ -254,7 +298,7 @@ export const GeraPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={chartData}
+                  data={chartData.filter((item) => item.value > 0)}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -262,10 +306,10 @@ export const GeraPage = () => {
                   outerRadius={60}
                   label
                 >
-                  {chartData.map((entry, index) => (
+                  {chartData.map((entry) => (
                     <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[entry.name as keyof typeof COLORS]}
+                      key={`cell-${entry.name}`}
+                      fill={COLORS[entry.name as StatusColorKey]}
                     />
                   ))}
                 </Pie>
@@ -284,22 +328,58 @@ export const GeraPage = () => {
       >
         <Card className="bg-card/70 backdrop-blur-lg">
           <CardHeader>
-            <CardTitle>Project Timeline</CardTitle>
+            <CardTitle>Project Plan Details</CardTitle>
             <CardDescription>
-              Click on each phase to expand and view detailed activities.
+              Click on each phase to see more details.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative">
               <div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border"></div>
               <div className="space-y-6">
-                {timelineData.map((item, index) => (
+                {projectTimelineData.map((item, index) => (
                   <TimelineItem
-                    key={index}
+                    key={`timeline-${index}`}
                     item={item}
-                    isOpen={openIndex === index}
+                    isOpen={openTimelineIndex === index}
                     onClick={() =>
-                      setOpenIndex(openIndex === index ? null : index)
+                      setOpenTimelineIndex(
+                        openTimelineIndex === index ? null : index
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* --- SECTION 2: JIRA DEMO --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card className="bg-card/70 backdrop-blur-lg">
+          <CardHeader>
+            <CardTitle>Jira Issues (Demonstration)</CardTitle>
+            <CardDescription>
+              This section demonstrates how live tasks and bugs from a connected
+              Jira project would be displayed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              <div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border"></div>
+              <div className="space-y-6">
+                {jiraDemoData.map((item, index) => (
+                  <TimelineItem
+                    key={`jira-${index}`}
+                    item={item}
+                    isOpen={openJiraIndex === index}
+                    onClick={() =>
+                      setOpenJiraIndex(openJiraIndex === index ? null : index)
                     }
                   />
                 ))}
