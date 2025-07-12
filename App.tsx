@@ -52,6 +52,7 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+console.log("App loaded");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
