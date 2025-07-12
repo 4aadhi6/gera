@@ -52,7 +52,6 @@ const ChangePasswordForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-console.log("App loaded");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +147,7 @@ const navItems: NavItem[] = [
   },
   {
     path: "/gera",
-    label: "Gera",
+    label: "Jira",
     icon: <BarChart3Icon className="w-5 h-5" />,
   },
   {
