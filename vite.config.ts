@@ -15,15 +15,17 @@
 //       }
 //     };
 // });
+
+
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react'; // 🔥 REQUIRED
+import react from '@vitejs/plugin-react'; // ✅ Required for JSX
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [react()], // 🔥 REQUIRED FOR JSX/TSX BUILD
-    base: '/', // ✅ Always for Vercel
+    plugins: [react()],
+    base: '/', // ✅ Important for Vercel
 
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
@@ -36,4 +38,3 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
-
