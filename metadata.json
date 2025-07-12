@@ -1,0 +1,6 @@
+{
+  "name": "Unified Talent Management Platform",
+  "description": "An all-in-one HR solution combining a modern React frontend with Google's Gemini API for intelligent features like AI-powered candidate ranking and promotion suggestions. Features a dark/light theme, professional animations, and a full suite of talent management tools.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
